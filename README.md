@@ -21,6 +21,9 @@
 ### About the Project
 Проект создан в учебных целях для Yandex Lyceum
 
+#### Installation
+pip install -r requirements.txt
+
 #### Autor:
 Aslan Dzeytov, young it-developer, 14 y.o.
 #### Связаться можно с помощью почты:
