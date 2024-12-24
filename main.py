@@ -10,3 +10,14 @@ from PyQt6.QtWidgets import (QMainWindow, QApplication, QPushButton,
 
 import sys
 
+
+class GameStructure:
+    def __init__(self, rows, cols, mines):
+        self.rows = rows
+        self.cols = cols
+        self.mines = mines
+        self.board = [[0 for _ in range(cols)] for _ in range(rows)]
+        self.generate_mines()
+
+    def generate_mines(self):
+        pass
