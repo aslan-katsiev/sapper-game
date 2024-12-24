@@ -4,3 +4,9 @@
 # 4 Создать функцию открытия клетки и поставить флажок
 # 5 Создать интерфейс - главное меню (выбор сложности) и главное поле
 # 6 Создать реакцию на победу или поражение пользователя
+
+from PyQt6.QtWidgets import (QMainWindow, QApplication, QPushButton,
+                             QGridLayout, QButtonGroup, QMessageBox)
+
+import sys
+
