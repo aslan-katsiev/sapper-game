@@ -6,9 +6,11 @@
 # 6 Создать реакцию на победу или поражение пользователя
 
 from PyQt6.QtWidgets import (QMainWindow, QApplication, QPushButton,
-                             QGridLayout, QButtonGroup, QMessageBox)
+                             QGridLayout, QButtonGroup, QMessageBox,
+                             QInputDialog, QWidget)
 
 import sys
+import random
 
 
 class GameStructure:
@@ -20,4 +22,20 @@ class GameStructure:
         self.generate_mines()
 
     def generate_mines(self):
+        mine_pos = set()
+        while len(mine_pos) < self.mines:
+            r = random.randint(0, self.rows - 1)
+            c = random.randint(0, self.cols - 1)
+
+            if (r, c) not in mine_pos:
+                mine_pos.add((r, c))
+                self.board[r][c] = -1
+
+    def count_mines_around(self, x, y):
         pass
+
+    def flag(self):
+        pass
+
+
+game = GameStructure(10, 10, 10)
