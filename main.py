@@ -11,6 +11,7 @@ from PyQt6.QtWidgets import (QMainWindow, QApplication, QPushButton,
 
 import sys
 import random
+from pprint import pprint
 
 
 class GameStructure:
@@ -20,6 +21,7 @@ class GameStructure:
         self.mines = mines
         self.board = [[0 for _ in range(cols)] for _ in range(rows)]
         self.generate_mines()
+        self.update_board()
 
     def generate_mines(self):
         mine_pos = set()
@@ -29,13 +31,33 @@ class GameStructure:
 
             if (r, c) not in mine_pos:
                 mine_pos.add((r, c))
-                self.board[r][c] = -1
+                self.board[r][c] = 9
 
     def count_mines_around(self, x, y):
-        pass
+        directions = [(-1, -1), (-1, 0), (-1, 1),
+                      (0, -1), (0, 1),
+                      (1, -1), (1, 0), (1, 1)]
+
+        mine_count = 0
+
+        for dx, dy in directions:
+            nx, ny = x + dx, y + dy
+
+            if 0 <= nx < self.rows and 0 <= ny < self.cols:
+                if self.board[nx][ny] == 9:
+                    mine_count += 1
+
+        return mine_count
+
+    def update_board(self):
+        for r in range(self.rows):
+            for c in range(self.cols):
+                if self.board[r][c] != 9:
+                    self.board[r][c] = self.count_mines_around(r, c)
 
     def flag(self):
         pass
 
 
 game = GameStructure(10, 10, 10)
+pprint(game.board)
