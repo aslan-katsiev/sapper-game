@@ -31,7 +31,7 @@ class GameStructure:
 
             if (r, c) not in mine_pos:
                 mine_pos.add((r, c))
-                self.board[r][c] = 9
+                self.board[r][c] = -1
 
     def count_mines_around(self, x, y):
         directions = [(-1, -1), (-1, 0), (-1, 1),
@@ -44,7 +44,7 @@ class GameStructure:
             nx, ny = x + dx, y + dy
 
             if 0 <= nx < self.rows and 0 <= ny < self.cols:
-                if self.board[nx][ny] == 9:
+                if self.board[nx][ny] == -1:
                     mine_count += 1
 
         return mine_count
@@ -52,12 +52,23 @@ class GameStructure:
     def update_board(self):
         for r in range(self.rows):
             for c in range(self.cols):
-                if self.board[r][c] != 9:
+                if self.board[r][c] != -1:
                     self.board[r][c] = self.count_mines_around(r, c)
 
     def flag(self):
         pass
 
 
-game = GameStructure(10, 10, 10)
-pprint(game.board)
+class GameWindow(QMainWindow):
+    def __init__(self, rows, cols, mines):
+        super().__init__()
+
+        game = GameStructure(rows=8, cols=8, mines=10)
+
+        self.setWindowTitle("Сапёр")
+        self.setFixedSize(600, 500)
+
+        self.initUI()
+
+    def initUI(self):
+        pass
