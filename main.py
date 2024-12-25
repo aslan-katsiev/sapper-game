@@ -60,7 +60,7 @@ class GameStructure:
 
 
 class GameWindow(QMainWindow):
-    def __init__(self, rows, cols, mines):
+    def __init__(self, rows=8, cols=8, mines=10):
         super().__init__()
 
         game = GameStructure(rows=8, cols=8, mines=10)
@@ -72,3 +72,10 @@ class GameWindow(QMainWindow):
 
     def initUI(self):
         pass
+
+
+if __name__ == '__main__':
+    app = QApplication(sys.argv)
+    window = GameWindow()
+    window.show()
+    sys.exit(app.exec())
