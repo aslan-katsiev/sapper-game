@@ -11,7 +11,6 @@ from PyQt6.QtWidgets import (QMainWindow, QApplication, QPushButton,
 
 import sys
 import random
-from pprint import pprint
 
 
 class GameStructure:
@@ -65,6 +64,8 @@ class GameWindow(QMainWindow):
 
         self.setWindowTitle("Сапёр")
 
+        self.buttons = []
+
         self.show_difficulty_selection()
 
     def show_difficulty_selection(self):
@@ -96,7 +97,7 @@ class GameWindow(QMainWindow):
     def init_game(self, difficulty):
         if difficulty == 'easy':
             rows, cols, mines = 8, 8, 10
-            self.setGeometry(100, 100, 300, 300)
+            self.setGeometry(100, 100, 250, 250)
         elif difficulty == 'medium':
             rows, cols, mines = 16, 16, 40
             self.setGeometry(100, 100, 400, 400)
@@ -117,6 +118,7 @@ class GameWindow(QMainWindow):
         central_widget.setLayout(layout)
 
         for i in range(len(self.game.board)):
+            row_buttons = []
             for j in range(len(self.game.board[0])):
                 but = QPushButton()
                 but.setFixedSize(30, 30)
@@ -124,9 +126,44 @@ class GameWindow(QMainWindow):
                 but.clicked.connect(self.open_cell)
 
                 layout.addWidget(but, i, j)
+                row_buttons.append(but)
+
+            self.buttons.append(row_buttons)
 
     def open_cell(self):
-        pass
+        button = self.sender()
+        for i in range(len(self.buttons)):
+            if button in self.buttons[i]:
+                j = self.buttons[i].index(button)
+                break
+
+        value = self.game.board[i][j]
+
+        button.setText(str(value))
+        if value == -1:
+            button.setText('M')
+            button.setStyleSheet('color: black;')
+        if value == 0:
+            button.setText('')
+        if value == 1:
+            button.setStyleSheet('color: blue; font-size: 25px; font-weight: bold;')
+        if value == 2:
+            button.setStyleSheet('color: green; font-size: 25px; font-weight: bold;')
+        if value == 3:
+            button.setStyleSheet('color: red; font-size: 25px; font-weight: bold;')
+        if value == 4:
+            button.setStyleSheet('color: purple; font-size: 25px; font-weight: bold;')
+        if value == 5:
+            button.setStyleSheet('color: brown; font-size: 25px; font-weight: bold;')
+        if value == 6:
+            button.setStyleSheet('color: yellow; font-size: 25px; font-weight: bold;')
+        if value == 7:
+            button.setStyleSheet('color: orange; font-size: 25px; font-weight: bold;')
+        if value == 8:
+            button.setStyleSheet('color: pink; font-size: 25px; font-weight: bold;')
+
+
+        button.setEnabled(False)
 
 
 if __name__ == '__main__':
