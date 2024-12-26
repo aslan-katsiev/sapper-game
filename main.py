@@ -7,7 +7,7 @@
 
 from PyQt6.QtWidgets import (QMainWindow, QApplication, QPushButton,
                              QGridLayout, QButtonGroup, QMessageBox,
-                             QInputDialog, QWidget)
+                             QInputDialog, QWidget, QVBoxLayout, QDialog)
 
 import sys
 import random
@@ -60,17 +60,72 @@ class GameStructure:
 
 
 class GameWindow(QMainWindow):
-    def __init__(self, rows=8, cols=8, mines=10):
+    def __init__(self, difficulty='easy'):
         super().__init__()
 
-        game = GameStructure(rows=8, cols=8, mines=10)
-
         self.setWindowTitle("Сапёр")
-        self.setFixedSize(600, 500)
+
+        self.show_difficulty_selection()
+
+    def show_difficulty_selection(self):
+        # Создание окна выбора сложности
+        dialog = QDialog(self)
+        dialog.setWindowTitle("Выберите уровень сложности")
+        dialog.setGeometry(100, 100, 200, 200)
+
+        layout = QVBoxLayout(dialog)
+
+        easy_button = QPushButton("Легкий")
+        medium_button = QPushButton("Средний")
+        hard_button = QPushButton("Сложный")
+
+        easy_button.clicked.connect(lambda: self.start_game('easy', dialog))
+        medium_button.clicked.connect(lambda: self.start_game('medium', dialog))
+        hard_button.clicked.connect(lambda: self.start_game('hard', dialog))
+
+        layout.addWidget(easy_button)
+        layout.addWidget(medium_button)
+        layout.addWidget(hard_button)
+
+        dialog.exec()
+
+    def start_game(self, difficulty, dialog):
+        dialog.accept()
+        self.init_game(difficulty)
+
+    def init_game(self, difficulty):
+        if difficulty == 'easy':
+            rows, cols, mines = 8, 8, 10
+            self.setGeometry(100, 100, 300, 300)
+        elif difficulty == 'medium':
+            rows, cols, mines = 16, 16, 40
+            self.setGeometry(100, 100, 400, 400)
+        elif difficulty == 'hard':
+            rows, cols, mines = 24, 24, 99
+            self.setGeometry(100, 100, 500, 500)
+
+        self.game = GameStructure(rows=rows, cols=cols, mines=mines)
 
         self.initUI()
 
     def initUI(self):
+        central_widget = QWidget()
+        self.setCentralWidget(central_widget)
+
+        layout = QGridLayout()
+        layout.setSpacing(0)
+        central_widget.setLayout(layout)
+
+        for i in range(len(self.game.board)):
+            for j in range(len(self.game.board[0])):
+                but = QPushButton()
+                but.setFixedSize(30, 30)
+
+                but.clicked.connect(self.open_cell)
+
+                layout.addWidget(but, i, j)
+
+    def open_cell(self):
         pass
 
 
