@@ -6,9 +6,9 @@
 # 6 Создать реакцию на победу или поражение пользователя
 
 from PyQt6.QtWidgets import (QMainWindow, QApplication, QPushButton,
-                             QGridLayout, QButtonGroup, QMessageBox,
-                             QInputDialog, QWidget, QVBoxLayout, QDialog)
-
+                             QGridLayout, QMessageBox,
+                             QWidget, QVBoxLayout, QDialog)
+from PyQt6.QtCore import Qt
 import sys
 import random
 
@@ -54,8 +54,32 @@ class GameStructure:
                 if self.board[r][c] != -1:
                     self.board[r][c] = self.count_mines_around(r, c)
 
-    def flag(self):
-        pass
+
+class FlagButton(QPushButton):
+    def __init__(self):
+        super().__init__()
+        self.is_flagged = False
+
+    def mousePressEvent(self, event):
+        if event.button() == Qt.MouseButton.RightButton:
+            self.toggle_flag()
+        elif event.button() == Qt.MouseButton.LeftButton:
+            if not self.is_flagged:
+                super().mousePressEvent(event)
+            else:
+                pass
+        else:
+            super().mousePressEvent(event)
+
+    def toggle_flag(self):
+        if self.is_flagged:
+            self.setText("")
+            self.setStyleSheet("")
+            self.is_flagged = False
+        else:
+            self.setText("🚩")
+            self.setStyleSheet("color: red;")
+            self.is_flagged = True
 
 
 class GameWindow(QMainWindow):
@@ -69,7 +93,6 @@ class GameWindow(QMainWindow):
         self.show_difficulty_selection()
 
     def show_difficulty_selection(self):
-        # Создание окна выбора сложности
         dialog = QDialog(self)
         dialog.setWindowTitle("Выберите уровень сложности")
         dialog.setGeometry(100, 100, 200, 200)
@@ -120,7 +143,7 @@ class GameWindow(QMainWindow):
         for i in range(len(self.game.board)):
             row_buttons = []
             for j in range(len(self.game.board[0])):
-                but = QPushButton()
+                but = FlagButton()
                 but.setFixedSize(30, 30)
 
                 but.clicked.connect(self.open_cell)
@@ -141,8 +164,8 @@ class GameWindow(QMainWindow):
 
         button.setText(str(value))
         if value == -1:
-            button.setText('M')
-            button.setStyleSheet('color: black;')
+            button.setText('💣')
+            button.setStyleSheet('color: black; font-size: 17px;')
         if value == 0:
             button.setText('')
         if value == 1:
@@ -161,7 +184,6 @@ class GameWindow(QMainWindow):
             button.setStyleSheet('color: orange; font-size: 25px; font-weight: bold;')
         if value == 8:
             button.setStyleSheet('color: pink; font-size: 25px; font-weight: bold;')
-
 
         button.setEnabled(False)
 
