@@ -82,14 +82,12 @@ class FlagButton(QPushButton):
             self.is_flagged = True
 
 
+
 class GameWindow(QMainWindow):
     def __init__(self, difficulty='easy'):
         super().__init__()
-
         self.setWindowTitle("Сапёр")
-
         self.buttons = []
-
         self.show_difficulty_selection()
 
     def show_difficulty_selection(self):
@@ -130,6 +128,8 @@ class GameWindow(QMainWindow):
 
         self.game = GameStructure(rows=rows, cols=cols, mines=mines)
 
+        self.buttons.clear()
+
         self.initUI()
 
     def initUI(self):
@@ -155,6 +155,10 @@ class GameWindow(QMainWindow):
 
     def open_cell(self):
         button = self.sender()
+
+        if button.text() == '🚩':
+            return  # Ignore clicks on flagged buttons
+
         for i in range(len(self.buttons)):
             if button in self.buttons[i]:
                 j = self.buttons[i].index(button)
@@ -162,30 +166,106 @@ class GameWindow(QMainWindow):
 
         value = self.game.board[i][j]
 
-        button.setText(str(value))
-        if value == -1:
+        if value == -1:  # Hit a mine
             button.setText('💣')
             button.setStyleSheet('color: black; font-size: 17px;')
-        if value == 0:
-            button.setText('')
-        if value == 1:
-            button.setStyleSheet('color: blue; font-size: 25px; font-weight: bold;')
-        if value == 2:
-            button.setStyleSheet('color: green; font-size: 25px; font-weight: bold;')
-        if value == 3:
-            button.setStyleSheet('color: red; font-size: 25px; font-weight: bold;')
-        if value == 4:
-            button.setStyleSheet('color: purple; font-size: 25px; font-weight: bold;')
-        if value == 5:
-            button.setStyleSheet('color: brown; font-size: 25px; font-weight: bold;')
-        if value == 6:
-            button.setStyleSheet('color: yellow; font-size: 25px; font-weight: bold;')
-        if value == 7:
-            button.setStyleSheet('color: orange; font-size: 25px; font-weight: bold;')
-        if value == 8:
-            button.setStyleSheet('color: pink; font-size: 25px; font-weight: bold;')
+            self.check_loose()
+            return
 
+        # Show number or empty cell based on value
+        button.setText(str(value) if value > 0 else '')
+
+        # Disable the button after opening it
         button.setEnabled(False)
+
+        if value == 0:
+            # Open adjacent cells if the cell is empty (0)
+            self.open_adjacent_cells(i, j)
+
+        color_map = {
+            1: ('blue', 'bold'),
+            2: ('green', 'bold'),
+            3: ('red', 'bold'),
+            4: ('purple', 'bold'),
+            5: ('brown', 'bold'),
+            6: ('yellow', 'bold'),
+            7: ('orange', 'bold'),
+            8: ('pink', 'bold')
+        }
+        if value in color_map:
+            color, weight = color_map[value]
+            button.setStyleSheet(f'color: {color}; font-size: 25px; font-weight: {weight};')
+        # Check win condition after opening a cell
+        if self.check_win_condition():
+            self.check_win()
+
+    def open_adjacent_cells(self, x, y):
+        directions = [(-1, -1), (-1, 0), (-1, 1),
+                      (0, -1), (0, 1),
+                      (1, -1), (1, 0), (1, 1)]
+
+        for dx, dy in directions:
+            nx, ny = x + dx, y + dy
+            if (0 <= nx < len(self.game.board)) and (0 <= ny < len(self.game.board[0])):
+                adjacent_button = self.buttons[nx][ny]
+
+                if adjacent_button.isEnabled():
+                    adjacent_value = self.game.board[nx][ny]
+                    adjacent_button.setText(str(adjacent_value))
+
+                    if adjacent_value == -1:
+                        adjacent_button.setText('💣')
+                        adjacent_button.setStyleSheet('color: black; font-size: 17px;')
+                        continue
+
+                    if adjacent_value == 0:
+                        adjacent_button.setText('')
+                        adjacent_button.setEnabled(False)
+                        self.open_adjacent_cells(nx, ny)
+                    else:
+                        color_map = {
+                            1: ('blue', 'bold'),
+                            2: ('green', 'bold'),
+                            3: ('red', 'bold'),
+                            4: ('purple', 'bold'),
+                            5: ('brown', 'bold'),
+                            6: ('yellow', 'bold'),
+                            7: ('orange', 'bold'),
+                            8: ('pink', 'bold')
+                        }
+                        color, weight = color_map[adjacent_value]
+                        adjacent_button.setStyleSheet(f'color: {color}; font-size: 25px; font-weight: {weight};')
+
+                    adjacent_button.setEnabled(False)
+
+    def check_win_condition(self):
+        total_safe_cells = sum(1 for row in self.game.board for cell in row if cell != -1)  # All non-mine cells
+        opened_cells = sum(1 for row in self.buttons for button in row if not button.isEnabled())  # Opened cells
+        flagged_cells = sum(1 for row in self.buttons for button in row if button.text() == '🚩')  # Flags
+
+        print(f"Total safe cells: {total_safe_cells}, Opened cells: {opened_cells}, Flagged cells: {flagged_cells}")
+
+        # Check win condition: all safe cells opened and all mines flagged
+        return opened_cells == total_safe_cells and flagged_cells == self.game.mines
+    def check_win(self):
+        win = QMessageBox()
+        win.setText('Поздравляем! Вы разминировали все бомбы! Хотите начать заново?')
+        win.setStandardButtons(QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
+
+        if win.exec() == QMessageBox.StandardButton.Yes:
+            self.show_difficulty_selection()
+        else:
+            QApplication.quit()
+
+    def check_loose(self):
+        loose = QMessageBox()
+        loose.setText('Вы попали на бомбу. Хотите начать заново?')
+        loose.setStandardButtons(QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
+
+        if loose.exec() == QMessageBox.StandardButton.Yes:
+            self.show_difficulty_selection()
+        else:
+            QApplication.quit()
 
 
 if __name__ == '__main__':
