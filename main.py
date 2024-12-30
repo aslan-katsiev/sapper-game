@@ -55,40 +55,13 @@ class GameStructure:
                     self.board[r][c] = self.count_mines_around(r, c)
 
 
-class FlagButton(QPushButton):
-    def __init__(self):
-        super().__init__()
-        self.is_flagged = False
-
-    def mousePressEvent(self, event):
-        if event.button() == Qt.MouseButton.RightButton:
-            self.toggle_flag()
-        elif event.button() == Qt.MouseButton.LeftButton:
-            if not self.is_flagged:
-                super().mousePressEvent(event)
-            else:
-                pass
-        else:
-            super().mousePressEvent(event)
-
-    def toggle_flag(self):
-        if self.is_flagged:
-            self.setText("")
-            self.setStyleSheet("")
-            self.is_flagged = False
-        else:
-            self.setText("🚩")
-            self.setStyleSheet("color: red;")
-            self.is_flagged = True
-
-
-
 class GameWindow(QMainWindow):
     def __init__(self, difficulty='easy'):
         super().__init__()
         self.setWindowTitle("Сапёр")
         self.buttons = []
         self.show_difficulty_selection()
+        self.is_flagged = False
 
     def show_difficulty_selection(self):
         dialog = QDialog(self)
@@ -143,8 +116,11 @@ class GameWindow(QMainWindow):
         for i in range(len(self.game.board)):
             row_buttons = []
             for j in range(len(self.game.board[0])):
-                but = FlagButton()
+                but = QPushButton()
                 but.setFixedSize(30, 30)
+
+                but.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
+                but.customContextMenuRequested.connect(lambda pos, button=but: self.toggle_flag(button))
 
                 but.clicked.connect(self.open_cell)
 
@@ -153,11 +129,35 @@ class GameWindow(QMainWindow):
 
             self.buttons.append(row_buttons)
 
+    def mousePressEvent(self, event):
+        button = self.sender()
+        if event.button() == Qt.MouseButton.RightButton:
+            self.toggle_flag(button)
+        elif event.button() == Qt.MouseButton.LeftButton:
+            if button.text() == '🚩':
+                return
+            else:
+                super().mousePressEvent(event)
+
+    def toggle_flag(self, button):
+        if button is None:
+            return
+
+        if button.text() == '🚩':
+            button.setText("")
+            button.setStyleSheet("")
+        else:
+            button.setText("🚩")
+            button.setStyleSheet("color: red;")
+
+        if self.check_win_condition():
+            self.check_win()
+
     def open_cell(self):
         button = self.sender()
 
         if button.text() == '🚩':
-            return  # Ignore clicks on flagged buttons
+            return
 
         for i in range(len(self.buttons)):
             if button in self.buttons[i]:
@@ -166,20 +166,17 @@ class GameWindow(QMainWindow):
 
         value = self.game.board[i][j]
 
-        if value == -1:  # Hit a mine
+        if value == -1:
             button.setText('💣')
             button.setStyleSheet('color: black; font-size: 17px;')
             self.check_loose()
             return
 
-        # Show number or empty cell based on value
         button.setText(str(value) if value > 0 else '')
 
-        # Disable the button after opening it
         button.setEnabled(False)
 
         if value == 0:
-            # Open adjacent cells if the cell is empty (0)
             self.open_adjacent_cells(i, j)
 
         color_map = {
@@ -195,7 +192,7 @@ class GameWindow(QMainWindow):
         if value in color_map:
             color, weight = color_map[value]
             button.setStyleSheet(f'color: {color}; font-size: 25px; font-weight: {weight};')
-        # Check win condition after opening a cell
+
         if self.check_win_condition():
             self.check_win()
 
@@ -239,14 +236,12 @@ class GameWindow(QMainWindow):
                     adjacent_button.setEnabled(False)
 
     def check_win_condition(self):
-        total_safe_cells = sum(1 for row in self.game.board for cell in row if cell != -1)  # All non-mine cells
-        opened_cells = sum(1 for row in self.buttons for button in row if not button.isEnabled())  # Opened cells
-        flagged_cells = sum(1 for row in self.buttons for button in row if button.text() == '🚩')  # Flags
+        total_safe_cells = sum(1 for row in self.game.board for cell in row if cell != -1)
+        opened_cells = sum(1 for row in self.buttons for button in row if not button.isEnabled())
+        flagged_cells = sum(1 for row in self.buttons for button in row if button.text() == '🚩')
 
-        print(f"Total safe cells: {total_safe_cells}, Opened cells: {opened_cells}, Flagged cells: {flagged_cells}")
-
-        # Check win condition: all safe cells opened and all mines flagged
         return opened_cells == total_safe_cells and flagged_cells == self.game.mines
+
     def check_win(self):
         win = QMessageBox()
         win.setText('Поздравляем! Вы разминировали все бомбы! Хотите начать заново?')
