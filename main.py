@@ -86,18 +86,26 @@ class GameWindow(QMainWindow):
 
     def start_game(self, difficulty, dialog):
         dialog.accept()
+        self.clear_ui()
         self.init_game(difficulty)
+
+    def clear_ui(self):
+        for row in self.buttons:
+            for button in row:
+                button.deleteLater()
+
+        self.buttons.clear()
 
     def init_game(self, difficulty):
         if difficulty == 'easy':
             rows, cols, mines = 8, 8, 10
-            self.setGeometry(100, 100, 250, 250)
+            self.setFixedSize(250, 250)
         elif difficulty == 'medium':
             rows, cols, mines = 16, 16, 40
-            self.setGeometry(100, 100, 400, 400)
+            self.setFixedSize(500, 500)
         elif difficulty == 'hard':
             rows, cols, mines = 24, 24, 99
-            self.setGeometry(100, 100, 500, 500)
+            self.setFixedSize(750, 750)
 
         self.game = GameStructure(rows=rows, cols=cols, mines=mines)
 
@@ -244,6 +252,7 @@ class GameWindow(QMainWindow):
 
     def check_win(self):
         win = QMessageBox()
+        win.setWindowTitle('Победа')
         win.setText('Поздравляем! Вы разминировали все бомбы! Хотите начать заново?')
         win.setStandardButtons(QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
 
@@ -254,6 +263,7 @@ class GameWindow(QMainWindow):
 
     def check_loose(self):
         loose = QMessageBox()
+        loose.setWindowTitle('Поражение')
         loose.setText('Вы попали на бомбу. Хотите начать заново?')
         loose.setStandardButtons(QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
 
