@@ -19,16 +19,16 @@ class GameStructure:
         self.cols = cols
         self.mines = mines
         self.board = [[0 for _ in range(cols)] for _ in range(rows)]
-        self.generate_mines()
-        self.update_board()
+        self.game_started = False
 
-    def generate_mines(self):
+    def generate_mines(self, first_click_x, first_click_y):
         mine_pos = set()
+
         while len(mine_pos) < self.mines:
             r = random.randint(0, self.rows - 1)
             c = random.randint(0, self.cols - 1)
 
-            if (r, c) not in mine_pos:
+            if (r, c) not in mine_pos and (r, c) != (first_click_x, first_click_y):
                 mine_pos.add((r, c))
                 self.board[r][c] = -1
 
@@ -54,6 +54,12 @@ class GameStructure:
                 if self.board[r][c] != -1:
                     self.board[r][c] = self.count_mines_around(r, c)
 
+    def first_click(self, x, y):
+        if not self.game_started:
+            self.game_started = True
+            self.generate_mines(x, y)
+            self.update_board()
+
 
 class GameWindow(QMainWindow):
     def __init__(self, difficulty='easy'):
@@ -62,6 +68,7 @@ class GameWindow(QMainWindow):
         self.buttons = []
         self.show_difficulty_selection()
         self.is_flagged = False
+        self.first_click_done = False
 
     def show_difficulty_selection(self):
         dialog = QDialog(self)
@@ -95,6 +102,7 @@ class GameWindow(QMainWindow):
                 button.deleteLater()
 
         self.buttons.clear()
+        self.first_click_done = False
 
     def init_game(self, difficulty):
         if difficulty == 'easy':
@@ -130,7 +138,7 @@ class GameWindow(QMainWindow):
                 but.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
                 but.customContextMenuRequested.connect(lambda pos, button=but: self.toggle_flag(button))
 
-                but.clicked.connect(self.open_cell)
+                but.clicked.connect(lambda checked, x=i, y=j: self.open_cell(x, y))
 
                 layout.addWidget(but, i, j)
                 row_buttons.append(but)
@@ -161,18 +169,18 @@ class GameWindow(QMainWindow):
         if self.check_win_condition():
             self.check_win()
 
-    def open_cell(self):
-        button = self.sender()
+    def open_cell(self, x, y):
+        button = self.buttons[x][y]
 
         if button.text() == '🚩':
             return
 
-        for i in range(len(self.buttons)):
-            if button in self.buttons[i]:
-                j = self.buttons[i].index(button)
-                break
+        if not self.first_click_done:
+            self.first_click_done = True
+            self.game.first_click(x, y)
+            self.game.update_board()
 
-        value = self.game.board[i][j]
+        value = self.game.board[x][y]
 
         if value == -1:
             button.setText('💣')
@@ -185,7 +193,7 @@ class GameWindow(QMainWindow):
         button.setEnabled(False)
 
         if value == 0:
-            self.open_adjacent_cells(i, j)
+            self.open_adjacent_cells(x, y)
 
         color_map = {
             1: ('blue', 'bold'),
