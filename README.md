@@ -1,5 +1,7 @@
 # Sapper
 
+![](['')
+
 ### What is Sapper
 [Sapper](https://minesweeper.online/ru/) - компьютерная игра-головоломка,
 в которой необходимо найти все мины на игровом поле,
