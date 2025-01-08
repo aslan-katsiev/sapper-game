@@ -7,7 +7,7 @@
 
 from PyQt6.QtWidgets import (QMainWindow, QApplication, QPushButton,
                              QGridLayout, QMessageBox,
-                             QWidget, QVBoxLayout, QDialog)
+                             QWidget, QVBoxLayout, QDialog, QMenuBar)
 from PyQt6.QtCore import Qt
 import sys
 import random
@@ -116,8 +116,6 @@ class GameWindow(QMainWindow):
             self.setFixedSize(750, 750)
 
         self.game = GameStructure(rows=rows, cols=cols, mines=mines)
-
-        self.buttons.clear()
 
         self.initUI()
 
