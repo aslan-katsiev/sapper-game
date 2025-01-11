@@ -1,6 +1,6 @@
 # Sapper
 
-![](https://github.com/aslan-katsiev/sapper-game/blob/develop/screenshot.png)
+![](['')
 
 ### What is Sapper
 [Sapper](https://minesweeper.online/ru/) - компьютерная игра-головоломка,

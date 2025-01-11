@@ -117,8 +117,6 @@ class GameWindow(QMainWindow):
 
         self.game = GameStructure(rows=rows, cols=cols, mines=mines)
 
-        self.buttons.clear()
-
         self.initUI()
 
     def initUI(self):
@@ -147,13 +145,16 @@ class GameWindow(QMainWindow):
 
     def mousePressEvent(self, event):
         button = self.sender()
-        if event.button() == Qt.MouseButton.RightButton:
-            self.toggle_flag(button)
-        elif event.button() == Qt.MouseButton.LeftButton:
-            if button.text() == '🚩':
-                return
-            else:
-                super().mousePressEvent(event)
+        if button:
+            if event.button() == Qt.MouseButton.RightButton:
+                self.toggle_flag(button)
+            elif event.button() == Qt.MouseButton.LeftButton:
+                if button.text() == '🚩':
+                    return
+                else:
+                    super().mousePressEvent(event)
+        else:
+            pass
 
     def toggle_flag(self, button):
         if button is None:
