@@ -7,9 +7,8 @@
 
 from PyQt6.QtWidgets import (QMainWindow, QApplication, QPushButton,
                              QGridLayout, QMessageBox,
-                             QWidget, QVBoxLayout, QDialog, QMenuBar)
-from PyQt6.QtCore import Qt, QUrl
-from PyQt6 import QtMultimedia
+                             QWidget, QVBoxLayout, QDialog)
+from PyQt6.QtCore import Qt
 import sys
 import random
 
